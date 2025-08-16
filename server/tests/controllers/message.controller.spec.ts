@@ -39,6 +39,112 @@ describe('POST /addMessage', () => {
   });
 
   // TODO: Task 2 - Write additional test cases for addMessageRoute
+
+  it('should return bad message body error if msg is empty', async () => {
+    const badMessage = {
+      msg: '',
+      msgFrom: 'User1',
+      msgDateTime: new Date('2024-06-04'),
+    };
+
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: badMessage });
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid message body');
+  });
+
+  it('should return bad message body error if msg is missing', async () => {
+    const badMessage = {
+      msgFrom: 'User1',
+      msgDateTime: new Date('2024-06-04'),
+    };
+
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: badMessage });
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid message body');
+  });
+
+  it('should return bad message body error if msgFrom is empty', async () => {
+    const badMessage = {
+      msg: 'Hello',
+      msgFrom: '',
+      msgDateTime: new Date('2024-06-04'),
+    };
+
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: badMessage });
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid message body');
+  });
+
+  it('should return bad message body error if msgFrom is missing', async () => {
+    const badMessage = {
+      msg: 'Hello',
+      msgDateTime: new Date('2024-06-04'),
+    };
+
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: badMessage });
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid message body');
+  });
+
+  it('should return bad message body error if msgDateTime is missing', async () => {
+    const badMessage = {
+      msg: 'Hello',
+      msgFrom: 'User1',
+    };
+
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: badMessage });
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid message body');
+  });
+
+  it('should return bad message body error if msgDateTime is null', async () => {
+    const badMessage = {
+      msg: 'Hello',
+      msgFrom: 'User1',
+      msgDateTime: null,
+    };
+
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: badMessage });
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid message body');
+  });
+
+  it('should return internal server error if saveMessage fails', async () => {
+    const validId = new mongoose.Types.ObjectId();
+    const message = {
+      _id: validId,
+      msg: 'Hello',
+      msgFrom: 'User1',
+      msgDateTime: new Date('2024-06-04'),
+    };
+
+    saveMessageSpy.mockResolvedValue({ error: 'Error saving document' });
+
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: message });
+
+    expect(response.status).toBe(500);
+    expect(response.text).toBe('Error when adding a message: Error saving document');
+  });
 });
 
 describe('GET /getMessages', () => {
